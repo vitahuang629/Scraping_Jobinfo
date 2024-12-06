@@ -8,14 +8,41 @@ st.title('Job Search')
 # 在側邊欄獲取搜尋條件
 keyword = st.text_input('Enter job keyword', 'Data Scientist')  # 預設為 "Data Scientist"
 current_page = st.number_input('Page number', min_value=1, value=1)
+area_dict = {
+    '台北市': '6001001000',
+    '新北市': '6001002000',
+    '桃園市': '6001005000',
+    '台中市': '6001008000',
+    '彰化縣': '6001010000',
+    '台南市': '6001014000',
+    '高雄市': '6001016000'
+}
 
+selected_areas = st.multiselect('Select areas', options=list(area_dict.keys()))
+print(selected_areas)
+
+if selected_areas:
+    # Verify the mapping from selected areas to area IDs
+    area_ids = [area_dict[area] for area in selected_areas]
+    
+    # Debug: Print the area IDs for verification
+    st.write(f"Mapped area IDs: {area_ids}")
+    
+    # Join the area IDs into a comma-separated string
+    area_param = ",".join(area_ids)
+    
+    # Display the area_param in the Streamlit app for debugging
+    st.write(f"Generated area_param: {area_param}")
+else:
+    st.write("Please select one or more areas.")
+    
 # 按鈕觸發爬取職缺資料
 if st.button('Search'):
     if keyword:
         st.write(f"Searching for '{keyword}' on page {current_page}...")
         
         # 呼叫爬取函數並確保返回的資料是字典格式
-        job_data = get_job_data(keyword, current_page)
+        job_data = get_job_data(keyword, area_param, current_page)
         
         # 如果返回的資料是 JSON 字符串，則需要解析它
         if isinstance(job_data, str):
@@ -34,6 +61,7 @@ if st.button('Search'):
                     st.write(f"Education: {job.get('education_experience', 'N/A')}")
                     st.write(f"Salary: {job.get('paid', 'N/A')}")
                     st.write(f"Posted on: {job.get('posted_date', 'N/A')}")
+                    st.write(f"Search key: {job.get('search_key', 'N/A')}")
                     st.write(f"[Job link]({job.get('url', '#')})")
                     st.write("---")
                 else:
